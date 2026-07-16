@@ -14,7 +14,7 @@ Il progetto non si limita a riassumere il codice corrente. Interroga commit, pat
 
 ## Stato del progetto
 
-La versione `0.1.0-SNAPSHOT` è un MVP funzionante. Può:
+La versione `0.1.0` è un MVP funzionante. Può:
 
 - descrivere repository, branch, stato e commit recenti;
 - ricostruire la storia di un file seguendone le rinomine;

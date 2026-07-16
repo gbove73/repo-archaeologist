@@ -8,21 +8,24 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+/** Traduce le eccezioni applicative in risposte HTTP uniformi basate sullo standard Problem Details. */
 @RestControllerAdvice
 public class ApiExceptionHandler {
 
     @ExceptionHandler({IllegalArgumentException.class, MethodArgumentNotValidException.class})
     ProblemDetail handleBadRequest(Exception exception) {
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
-        problem.setTitle("Richiesta non valida");
-        problem.setProperty("timestamp", Instant.now());
-        return problem;
+        return createProblem(HttpStatus.BAD_REQUEST, "Richiesta non valida", exception);
     }
 
     @ExceptionHandler(GitCommandException.class)
     ProblemDetail handleGitFailure(GitCommandException exception) {
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_CONTENT, exception.getMessage());
-        problem.setTitle("Analisi Git non riuscita");
+        return createProblem(HttpStatus.UNPROCESSABLE_CONTENT, "Analisi Git non riuscita", exception);
+    }
+
+    private ProblemDetail createProblem(HttpStatus status, String title, Exception exception) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, exception.getMessage());
+        problem.setTitle(title);
+        // Il timestamp aiuta a correlare la risposta con i log senza esporre dettagli interni.
         problem.setProperty("timestamp", Instant.now());
         return problem;
     }

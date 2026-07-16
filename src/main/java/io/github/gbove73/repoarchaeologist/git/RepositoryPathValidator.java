@@ -6,7 +6,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import org.springframework.stereotype.Component;
 
-/** Impedisce ai tool di accedere a file esterni al repository configurato. */
+/**
+ * Impedisce ai tool di accedere a file esterni al repository configurato.
+ *
+ * <p>La verifica avviene sia sul percorso normalizzato sia sul percorso reale. Il primo controllo
+ * blocca sequenze come {@code ../}; il secondo risolve i collegamenti simbolici e impedisce che un
+ * file apparentemente interno punti in realtà a dati esterni alla working tree.</p>
+ */
 @Component
 public class RepositoryPathValidator {
 
@@ -21,8 +27,11 @@ public class RepositoryPathValidator {
             throw new IllegalArgumentException("Il percorso del file è obbligatorio");
         }
         Path normalizedCandidate = repositoryRoot.resolve(relativePath).normalize();
-        if (!normalizedCandidate.startsWith(repositoryRoot) || !Files.isRegularFile(normalizedCandidate)) {
+        if (!normalizedCandidate.startsWith(repositoryRoot)) {
             throw new IllegalArgumentException("File non valido o esterno al repository: " + relativePath);
+        }
+        if (!Files.isRegularFile(normalizedCandidate)) {
+            throw new IllegalArgumentException("Il percorso non identifica un file regolare: " + relativePath);
         }
         Path realCandidate = resolveRealPath(normalizedCandidate, "File non accessibile");
         if (!realCandidate.startsWith(repositoryRoot)) {

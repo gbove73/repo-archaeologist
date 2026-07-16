@@ -41,6 +41,28 @@ class GitCommandRunnerTest {
                 .hasMessageContaining("non consentito");
     }
 
+    @Test
+    void drainsAndTruncatesOutputWithoutBlocking() throws IOException, InterruptedException {
+        String largeContent = "content\n".repeat(20_000);
+        Files.writeString(repository.resolve("large.txt"), largeContent);
+        runGit("add", "large.txt");
+        runGit("commit", "-m", "Add large file");
+        GitCommandRunner limitedRunner = new GitCommandRunner(new ArchaeologistProperties(repository, 5, 1_000));
+
+        assertThat(limitedRunner.run("show", "HEAD"))
+                .hasSizeLessThan(1_100)
+                .endsWith("...[output troncato dal limite di sicurezza]");
+    }
+
+    @Test
+    void rejectsRepositoryConfiguredAsWorkTreeSubdirectory() throws IOException {
+        Path subdirectory = Files.createDirectory(repository.resolve("subdirectory"));
+
+        assertThatThrownBy(() -> new GitCommandRunner(new ArchaeologistProperties(subdirectory, 5, 10_000)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("root Git");
+    }
+
     private void runGit(String... arguments) throws IOException, InterruptedException {
         String[] command = new String[arguments.length + 1];
         command[0] = "git";

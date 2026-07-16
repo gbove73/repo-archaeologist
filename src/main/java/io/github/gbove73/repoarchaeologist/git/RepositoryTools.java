@@ -7,7 +7,13 @@ import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Service;
 
-/** Tool condivisi dal modello locale e dai client MCP esterni. */
+/**
+ * Raccolta delle operazioni di lettura offerte sia al modello locale sia ai client MCP esterni.
+ *
+ * <p>I metodi descrivono intenzioni di dominio (per esempio «storia di un file») e delegano i due
+ * aspetti infrastrutturali ai componenti dedicati: {@link GitCommandRunner} esegue Git in sicurezza,
+ * mentre {@link RepositoryPathValidator} controlla i percorsi ricevuti dall'esterno.</p>
+ */
 @Service
 public class RepositoryTools {
 
@@ -67,9 +73,7 @@ public class RepositoryTools {
             @ToolParam(description = "Ultima riga inclusa")
             @McpToolParam(description = "Ultima riga inclusa", required = true)
             int endLine) {
-        if (startLine < 1 || endLine < startLine || endLine - startLine > 300) {
-            throw new IllegalArgumentException("Intervallo righe non valido o superiore a 300 righe");
-        }
+        validateLineRange(startLine, endLine);
         String validPath = pathValidator.validateFile(filePath);
         return git.run("blame", "--date=short", "-L", startLine + "," + endLine, "--", validPath);
     }
@@ -80,9 +84,7 @@ public class RepositoryTools {
             @ToolParam(description = "Testo letterale da cercare nella cronologia")
             @McpToolParam(description = "Testo letterale da cercare nella cronologia", required = true)
             String query) {
-        if (query == null || query.isBlank() || query.length() > 120) {
-            throw new IllegalArgumentException("La ricerca deve contenere da 1 a 120 caratteri");
-        }
+        validateSearchQuery(query);
         String byMessage = git.run("log", "-20", "--date=short", "--regexp-ignore-case",
                 "--grep=" + query, "--pretty=format:" + LOG_FORMAT);
         String byPatch = git.run("log", "-20", "--date=short", "-S" + query,
@@ -105,5 +107,18 @@ public class RepositoryTools {
 
     private String emptyLabel(String value) {
         return value.isBlank() ? "Nessun risultato" : value;
+    }
+
+    private void validateLineRange(int startLine, int endLine) {
+        int requestedLines = endLine - startLine + 1;
+        if (startLine < 1 || endLine < startLine || requestedLines > 300) {
+            throw new IllegalArgumentException("Intervallo righe non valido o superiore a 300 righe");
+        }
+    }
+
+    private void validateSearchQuery(String query) {
+        if (query == null || query.isBlank() || query.length() > 120) {
+            throw new IllegalArgumentException("La ricerca deve contenere da 1 a 120 caratteri");
+        }
     }
 }
