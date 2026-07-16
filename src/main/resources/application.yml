@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: repo-archaeologist
+  ai:
+    ollama:
+      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+      chat:
+        options:
+          model: ${OLLAMA_MODEL:qwen3:8b}
+          temperature: 0.1
+    mcp:
+      server:
+        name: repo-archaeologist
+        version: 0.1.0
+        protocol: STREAMABLE
+        type: SYNC
+        instructions: >-
+          Analizza in sola lettura la cronologia del repository Git configurato e restituisce evidenze verificabili.
+
+archaeologist:
+  repository: ${ARCHAEOLOGIST_REPOSITORY:.}
+  command-timeout-seconds: ${GIT_COMMAND_TIMEOUT_SECONDS:10}
+  max-output-characters: ${GIT_MAX_OUTPUT_CHARACTERS:30000}
+
+server:
+  port: ${SERVER_PORT:8080}
