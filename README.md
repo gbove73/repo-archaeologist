@@ -247,3 +247,7 @@ Mantenere identificatori e nomi tecnici in inglese; documentazione e commenti po
 ## Licenza
 
 Distribuito con licenza [Apache License 2.0](LICENSE).
+
+## Autore
+
+Gianluca Bove.
