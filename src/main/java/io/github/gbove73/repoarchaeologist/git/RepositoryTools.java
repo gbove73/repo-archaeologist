@@ -67,7 +67,7 @@ public class RepositoryTools {
             @ToolParam(description = "Ultima riga inclusa")
             @McpToolParam(description = "Ultima riga inclusa", required = true)
             int endLine) {
-        if (startLine < 1 || endLine < startLine || endLine - startLine > 300) {
+        if (startLine < 1 || endLine < startLine || endLine - startLine >= 300) {
             throw new IllegalArgumentException("Intervallo righe non valido o superiore a 300 righe");
         }
         String validPath = pathValidator.validateFile(filePath);
