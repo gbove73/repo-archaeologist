@@ -8,7 +8,6 @@ Il formato segue [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) e il p
 
 ### Changed
 
-- Aggiunta al README l'indicazione dell'autore del progetto.
 - Riorganizzate esecuzione dei processi Git, validazioni e creazione degli errori HTTP in funzioni più piccole e focalizzate, preservando il comportamento pubblico.
 - Ampliata la documentazione italiana dei componenti e dei principali vincoli di sicurezza per rendere comprensibili architettura e motivazioni anche a chi non conosce Java.
 
