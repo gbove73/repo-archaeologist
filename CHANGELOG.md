@@ -6,6 +6,8 @@ Il formato segue [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) e il p
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-07-17
+
 ### Added
 
 - Aggiunta una demo web responsive servita direttamente dall'applicazione, con domande di esempio, stato di caricamento e visualizzazione degli errori.
@@ -14,6 +16,7 @@ Il formato segue [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) e il p
 
 - Riorganizzate esecuzione dei processi Git, validazioni e creazione degli errori HTTP in funzioni più piccole e focalizzate, preservando il comportamento pubblico.
 - Ampliata la documentazione italiana dei componenti e dei principali vincoli di sicurezza per rendere comprensibili architettura e motivazioni anche a chi non conosce Java.
+- Documentati con diagrammi dai confini espliciti i percorsi REST e MCP, chiarendo che il server MCP non esegue un LLM, il ruolo dei client esterni, il contratto dei cinque tool e il flusso di integrazione con Open WebUI.
 
 ## [0.1.0] - 2026-07-16
 

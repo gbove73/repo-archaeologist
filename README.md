@@ -14,7 +14,7 @@ Il progetto non si limita a riassumere il codice corrente. Interroga commit, pat
 
 ## Stato del progetto
 
-La versione `0.1.0` è un MVP funzionante. Può:
+La versione `0.1.1` è un MVP funzionante. Può:
 
 - descrivere repository, branch, stato e commit recenti;
 - ricostruire la storia di un file seguendone le rinomine;
@@ -35,22 +35,119 @@ La versione `0.1.0` è un MVP funzionante. Può:
 
 ## Architettura
 
-```text
-Utente o client REST
-        |
-        v
-InvestigationService -----> Ollama locale
-        |                       |
-        +---- tool calling <----+
-        |
-        v
-RepositoryTools <-------- Client MCP esterno
-        |
-        v
-GitCommandRunner -----> repository Git locale (sola lettura)
+Repo Archaeologist offre due percorsi alternativi che condividono gli stessi
+strumenti Git:
+
+```mermaid
+flowchart TD
+    Browser["Browser dell'utente"]
+    McpClient["Client MCP esterno<br/>Open WebUI, Zed, Continue o Goose"]
+    Ollama["Ollama locale<br/>qwen3:8b"]
+    Repository["Repository Git configurato<br/>(sola lettura)"]
+
+    subgraph Archaeologist["Repo Archaeologist"]
+        WebPage["Pagina web statica"]
+        RestController["InvestigationController<br/>API REST"]
+        InvestigationService["InvestigationService"]
+        McpServer["Server MCP Spring AI<br/>Streamable HTTP"]
+        RepositoryTools["RepositoryTools"]
+        GitRunner["GitCommandRunner"]
+        PathValidator["RepositoryPathValidator"]
+
+        WebPage -->|POST /api/investigations| RestController
+        RestController --> InvestigationService
+        McpServer --> RepositoryTools
+        RepositoryTools --> GitRunner
+        RepositoryTools --> PathValidator
+    end
+
+    Browser -->|HTTP| WebPage
+    InvestigationService -->|richiesta al modello| Ollama
+    Ollama -->|tool calling Spring AI| RepositoryTools
+    McpClient -->|MCP su /mcp| McpServer
+    GitRunner -->|comandi Git consentiti| Repository
 ```
 
-`RepositoryTools` è il nucleo dell'applicazione. Ogni operazione è annotata sia come tool Spring AI sia come tool MCP, evitando di duplicare logica e regole di sicurezza.
+### Percorso web: REST e Ollama
+
+La pagina disponibile su `http://localhost:8080` non usa MCP. Invia la domanda
+all'API REST; `InvestigationService` la passa al modello Ollama configurato, che
+decide quali operazioni di `RepositoryTools` chiamare. Il modello riceve le
+evidenze Git e formula la risposta mostrata nella pagina.
+
+```mermaid
+flowchart LR
+    Browser["Browser"]
+    Ollama["Ollama"]
+    Repository["Repository Git"]
+
+    subgraph Archaeologist["Repo Archaeologist"]
+        WebPage["Pagina web"]
+        Rest["API REST"]
+        Service["InvestigationService"]
+        Tools["RepositoryTools"]
+        Runner["GitCommandRunner"]
+
+        WebPage --> Rest --> Service
+        Tools --> Runner
+    end
+
+    Browser --> WebPage
+    Service --> Ollama
+    Ollama -->|tool calling| Tools
+    Runner --> Repository
+```
+
+In questo percorso Repo Archaeologist è un'applicazione AI completa: fornisce
+interfaccia, coordinamento del modello e strumenti Git.
+
+### Percorso MCP: strumenti per un assistente esterno
+
+MCP, Model Context Protocol, è uno standard che permette a un'applicazione AI di
+scoprire e usare strumenti offerti da un altro processo. Un client MCP esterno può
+essere, per esempio, Open WebUI, Zed, Continue o Goose.
+
+```mermaid
+flowchart LR
+    Client["Client MCP esterno<br/>e relativo modello AI"]
+    Repository["Repository Git"]
+
+    subgraph Archaeologist["Repo Archaeologist"]
+        McpServer["Server MCP"]
+        Tools["RepositoryTools"]
+        Runner["GitCommandRunner"]
+
+        McpServer --> Tools --> Runner
+    end
+
+    Client -->|Streamable HTTP| McpServer
+    Runner --> Repository
+```
+
+Il client esterno gestisce la conversazione e il proprio modello. Repo
+Archaeologist agisce invece come server specializzato: descrive i tool
+disponibili, ne valida i parametri, esegue operazioni Git in sola lettura e
+restituisce le evidenze. Il client decide quali tool chiamare e costruisce la
+risposta finale.
+
+In questo percorso Repo Archaeologist non esegue un LLM e non chiama Ollama.
+`InvestigationController`, `InvestigationService` e il `ChatClient` configurato
+per Ollama appartengono esclusivamente al percorso web REST e non partecipano
+alle richieste MCP.
+
+Il client MCP può comunque scegliere lo stesso Ollama locale e lo stesso modello
+`qwen3:8b`. In tal caso è il client, per esempio Open WebUI, a comunicare con
+Ollama:
+
+```text
+Pagina nativa: Repo Archaeologist -> Ollama
+Percorso MCP:  Open WebUI -> Ollama
+               Open WebUI -> MCP -> Repo Archaeologist
+```
+
+`RepositoryTools` è quindi il nucleo condiviso dell'applicazione. Ogni operazione
+è annotata sia come tool Spring AI per Ollama sia come tool MCP, evitando di
+duplicare logica e regole di sicurezza.
 
 ### Componenti principali
 
@@ -61,6 +158,7 @@ GitCommandRunner -----> repository Git locale (sola lettura)
 | `RepositoryTools` | Definisce le operazioni archeologiche disponibili |
 | `GitCommandRunner` | Esegue comandi Git consentiti senza utilizzare una shell |
 | `RepositoryPathValidator` | Blocca path traversal e file esterni al repository |
+| Server MCP Spring AI | Pubblica `RepositoryTools` ai client esterni tramite Streamable HTTP |
 
 ## Stack tecnologico
 
@@ -220,17 +318,139 @@ Esempio concettuale di configurazione di un client MCP:
 }
 ```
 
-I tool pubblicati sono:
+Quando si collega, il client riceve il catalogo dei tool con nome, descrizione,
+parametri e tipi. Non riceve accesso libero alla shell o a Git.
 
-| Tool | Descrizione |
-|---|---|
-| `repositoryOverview` | Panoramica e commit recenti |
-| `fileHistory` | Storia e patch di un file |
-| `blameLines` | Origine di un intervallo di righe |
-| `searchHistory` | Ricerca nei messaggi e nel contenuto delle modifiche |
-| `inspectCommit` | Analisi completa di un commit |
+### Tool MCP disponibili
 
-Il formato esatto della configurazione dipende dal client MCP utilizzato.
+#### `repositoryOverview`
+
+```text
+repositoryOverview()
+```
+
+Non richiede parametri. Restituisce percorso e radice del repository, branch
+corrente, stato della working tree e ultimi dieci commit.
+
+Esempio di domanda:
+
+> Fammi una panoramica del repository e degli ultimi cambiamenti.
+
+#### `fileHistory`
+
+```text
+fileHistory(filePath: "src/main/java/example/SpidValidator.java")
+```
+
+Riceve il percorso relativo di un file e ne restituisce fino a dodici commit con
+metadati e patch, seguendo anche eventuali rinomine.
+
+Esempio di domanda:
+
+> Come si è evoluto `SpidValidator.java` e perché è cambiato?
+
+#### `blameLines`
+
+```text
+blameLines(
+  filePath: "src/main/java/example/SpidValidator.java",
+  startLine: 40,
+  endLine: 65
+)
+```
+
+Attribuisce le righe richieste ai commit che le hanno introdotte. L'intervallo è
+inclusivo, parte da 1 e non può superare 300 righe.
+
+Esempio di domanda:
+
+> Quali commit hanno introdotto la validazione tra le righe 40 e 65?
+
+#### `searchHistory`
+
+```text
+searchHistory(query: "fiscalCode")
+```
+
+Cerca un testo letterale sia nei messaggi dei commit sia nel contenuto aggiunto o
+rimosso dalle patch. La ricerca deve contenere da 1 a 120 caratteri.
+
+Esempio di domanda:
+
+> Quando è comparso per la prima volta `fiscalCode`?
+
+#### `inspectCommit`
+
+```text
+inspectCommit(commit: "a84f12c")
+```
+
+Riceve un hash Git completo o abbreviato e restituisce metadati, statistiche e
+patch del commit.
+
+Esempio di domanda:
+
+> Esamina il commit `a84f12c` e spiegami cosa ha cambiato.
+
+### Esempio di flusso con Open WebUI
+
+Alla domanda:
+
+> Perché è stato introdotto il controllo sul codice fiscale?
+
+il modello configurato in Open WebUI potrebbe:
+
+1. chiamare `searchHistory("codice fiscale")`;
+2. cercare anche `searchHistory("fiscalCode")`;
+3. approfondire il commit trovato con `inspectCommit("a84f12c")`;
+4. consultare il file interessato con `fileHistory(...)`;
+5. combinare le evidenze nella risposta finale.
+
+```mermaid
+flowchart LR
+    User["Utente"]
+    Ollama["Ollama e LLM<br/>gestiti da Open WebUI"]
+    Repository["Repository Git"]
+
+    subgraph Client["Client MCP esterno"]
+        OpenWebUI["Open WebUI<br/>chat e orchestrazione"]
+    end
+
+    subgraph Archaeologist["Repo Archaeologist<br/>nessun LLM nel percorso MCP"]
+        McpServer["Server MCP"]
+        Tools["RepositoryTools"]
+        Runner["GitCommandRunner"]
+
+        McpServer --> Tools --> Runner
+    end
+
+    User --> OpenWebUI
+    OpenWebUI -->|"domanda e risultati dei tool"| Ollama
+    Ollama -->|"scelta del tool"| OpenWebUI
+    OpenWebUI -->|"chiamata MCP"| McpServer
+    Runner -->|"lettura"| Repository
+    McpServer -->|"evidenze Git"| OpenWebUI
+```
+
+Open WebUI gestisce quindi la chat e orchestra il modello; Ollama esegue il
+modello; Repo Archaeologist riceve le chiamate MCP e restituisce evidenze Git. Il
+server MCP non formula la risposta finale e non coinvolge
+`InvestigationService`.
+
+### Limiti del contratto MCP
+
+Il server MCP:
+
+- non modifica file, commit o branch;
+- non esegue push;
+- non accetta comandi shell o Git arbitrari;
+- non legge file esterni al repository configurato;
+- non permette di cambiare repository durante una richiesta;
+- non interroga automaticamente issue e pull request remote.
+
+Il repository è fissato all'avvio tramite `ARCHAEOLOGIST_REPOSITORY`; tutti i
+client collegati lavorano su quella stessa working tree. Il formato esatto della
+configurazione dipende dal client MCP utilizzato.
 
 ## Configurazione
 
