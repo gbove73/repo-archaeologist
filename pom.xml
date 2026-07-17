@@ -13,7 +13,7 @@
 
     <groupId>io.github.gbove73</groupId>
     <artifactId>repo-archaeologist</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
     <name>Repo Archaeologist</name>
     <description>Assistente locale per ricostruire la storia e le motivazioni di un repository Git</description>
     <url>https://github.com/gbove73/repo-archaeologist</url>
