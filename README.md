@@ -119,6 +119,59 @@ export ARCHAEOLOGIST_REPOSITORY=/percorso/assoluto/al/repository
 
 L'applicazione ascolta per impostazione predefinita su `http://localhost:8080`.
 
+Aprendo lo stesso indirizzo nel browser è disponibile una demo web locale, senza
+dipendenze frontend aggiuntive. La pagina usa l'API REST dell'applicazione e mostra
+alcune domande di esempio per presentare rapidamente il flusso di investigazione.
+
+### Esecuzione rapida della demo su macOS
+
+La demo richiede due terminali. Nel primo avviare Ollama e, solo al primo utilizzo,
+scaricare il modello configurato:
+
+```bash
+ollama pull qwen3:8b
+ollama serve
+```
+
+Se l'applicazione Ollama è già attiva nella barra dei menu, `ollama serve` non è
+necessario. È possibile verificare i modelli installati con:
+
+```bash
+ollama list
+```
+
+Nel secondo terminale entrare nella directory di Repo Archaeologist, attivare il
+JDK dichiarato dal progetto e indicare il repository Git da analizzare:
+
+```bash
+cd /percorso/assoluto/repo-archaeologist
+sdk env
+export ARCHAEOLOGIST_REPOSITORY=/percorso/assoluto/al/repository-da-analizzare
+./mvnw spring-boot:run
+```
+
+Il percorso assegnato ad `ARCHAEOLOGIST_REPOSITORY` deve essere la radice di una
+working tree Git. Per provare l'applicazione su sé stessa:
+
+```bash
+export ARCHAEOLOGIST_REPOSITORY="$(pwd)"
+./mvnw spring-boot:run
+```
+
+Quando nei log compare `Started RepoArchaeologistApplication`, aprire:
+
+```text
+http://localhost:8080
+```
+
+Una prima risposta può richiedere più tempo perché Ollama deve caricare il modello
+in memoria. Per una verifica rapida si può chiedere:
+
+> Qual è lo scopo di questo repository? Cita un commit come evidenza.
+
+Per arrestare l'applicazione premere `Ctrl+C` nel terminale Spring Boot. Fare lo
+stesso nel terminale Ollama se il server è stato avviato manualmente.
+
 ### Avvio da IntelliJ IDEA Community Edition
 
 1. Aprire la directory del progetto.

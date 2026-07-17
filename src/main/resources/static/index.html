@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="it">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Demo locale di Repo Archaeologist">
+    <title>Repo Archaeologist</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<main class="page-shell">
+    <header class="hero">
+        <div>
+            <p class="eyebrow">Git history, explained</p>
+            <h1>Repo<br>Archaeologist</h1>
+        </div>
+        <p class="hero-copy">
+            Interroga la storia del repository. Le risposte distinguono evidenze,
+            inferenze e ciò che Git non può dimostrare.
+        </p>
+    </header>
+
+    <section class="workspace" aria-labelledby="investigation-title">
+        <div class="workspace-heading">
+            <div>
+                <span class="step-number">01</span>
+                <h2 id="investigation-title">Avvia un’indagine</h2>
+            </div>
+            <span class="local-badge"><span aria-hidden="true"></span> Solo locale</span>
+        </div>
+
+        <form id="investigation-form">
+            <label for="question">Cosa vuoi scoprire?</label>
+            <textarea
+                id="question"
+                name="question"
+                maxlength="2000"
+                required
+                placeholder="Es. Perché è stata introdotta questa validazione?"
+            ></textarea>
+
+            <div class="suggestions" aria-label="Domande di esempio">
+                <button type="button" class="suggestion">Quali sono i cambiamenti più importanti?</button>
+                <button type="button" class="suggestion">Perché esiste RepositoryPathValidator?</button>
+                <button type="button" class="suggestion">Quali vincoli di sicurezza emergono dalla storia?</button>
+            </div>
+
+            <div class="form-actions">
+                <p>Il modello può consultare commit, patch, blame e rinomine.</p>
+                <button id="submit-button" class="primary-button" type="submit">
+                    <span>Scava nella storia</span>
+                    <span aria-hidden="true">→</span>
+                </button>
+            </div>
+        </form>
+    </section>
+
+    <section id="result-panel" class="result-panel" aria-labelledby="result-title" hidden>
+        <div class="result-heading">
+            <div>
+                <span class="step-number">02</span>
+                <h2 id="result-title">Reperto</h2>
+            </div>
+            <time id="generated-at"></time>
+        </div>
+        <div id="result-content" class="result-content" aria-live="polite"></div>
+    </section>
+</main>
+
+<footer>
+    <span>Repo Archaeologist · 0.1.0</span>
+    <span>REST + MCP + Ollama</span>
+</footer>
+
+<script src="/app.js"></script>
+</body>
+</html>

@@ -6,6 +6,10 @@ Il formato segue [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) e il p
 
 ## [Unreleased]
 
+### Added
+
+- Aggiunta una demo web responsive servita direttamente dall'applicazione, con domande di esempio, stato di caricamento e visualizzazione degli errori.
+
 ### Changed
 
 - Riorganizzate esecuzione dei processi Git, validazioni e creazione degli errori HTTP in funzioni più piccole e focalizzate, preservando il comportamento pubblico.
