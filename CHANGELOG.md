@@ -6,6 +6,10 @@ Il formato segue [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) e il p
 
 ## [Unreleased]
 
+### Changed
+
+- Aggiornati gli esempi d'uso nella documentazione per renderli più generali e riutilizzabili.
+
 ## [0.1.1] - 2026-07-17
 
 ### Added

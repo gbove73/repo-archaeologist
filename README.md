@@ -339,7 +339,7 @@ Esempio di domanda:
 #### `fileHistory`
 
 ```text
-fileHistory(filePath: "src/main/java/example/SpidValidator.java")
+fileHistory(filePath: "src/main/java/com/example/service/OrderService.java")
 ```
 
 Riceve il percorso relativo di un file e ne restituisce fino a dodici commit con
@@ -347,13 +347,13 @@ metadati e patch, seguendo anche eventuali rinomine.
 
 Esempio di domanda:
 
-> Come si è evoluto `SpidValidator.java` e perché è cambiato?
+> Come si è evoluto `OrderService.java` e perché è cambiato?
 
 #### `blameLines`
 
 ```text
 blameLines(
-  filePath: "src/main/java/example/SpidValidator.java",
+  filePath: "src/main/java/com/example/service/OrderService.java",
   startLine: 40,
   endLine: 65
 )
