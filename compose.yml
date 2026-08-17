@@ -1,0 +1,20 @@
+services:
+  repo-archaeologist:
+    build:
+      context: .
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${APP_PORT:-18080}:8080"
+    environment:
+      ARCHAEOLOGIST_REPOSITORY: /repository
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://172.30.0.1:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen3:8b}
+      SERVER_SERVLET_CONTEXT_PATH: /repo-archaeologist
+    volumes:
+      - "${ARCHAEOLOGIST_REPOSITORY:-.}:/repository:ro"
+    networks:
+      - shared-services
+
+networks:
+  shared-services:
+    external: true

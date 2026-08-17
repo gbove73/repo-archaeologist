@@ -19,7 +19,7 @@ form.addEventListener("submit", async (event) => {
     showResult("Sto consultando la cronologia Git…");
 
     try {
-        const response = await fetch("/api/investigations", {
+        const response = await fetch("api/investigations", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({question: questionInput.value.trim()})

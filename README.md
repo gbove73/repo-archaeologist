@@ -217,6 +217,45 @@ export ARCHAEOLOGIST_REPOSITORY=/percorso/assoluto/al/repository
 
 L'applicazione ascolta per impostazione predefinita su `http://localhost:8080`.
 
+## Deployment su Contabo
+
+Il deployment di produzione esegue soltanto Repo Archaeologist in Docker. Ollama
+resta installato sull'host, così una singola istanza e gli stessi modelli possono
+essere condivisi tra più applicazioni senza duplicare memoria e spazio disco.
+
+Prima del primo avvio, Ollama deve accettare connessioni provenienti dalla rete
+bridge di Docker. L'indirizzo resta configurabile tramite `OLLAMA_BASE_URL`; il
+valore predefinito usa il gateway `172.30.0.1` della rete esterna
+`shared-services`, predisposta sull'host e autorizzata dal firewall.
+
+La configurazione di esempio può essere personalizzata senza versionare dati
+specifici del server:
+
+```bash
+cp .env.example .env
+docker compose up --detach --build
+```
+
+Il container monta in sola lettura il repository indicato da
+`ARCHAEOLOGIST_REPOSITORY`, espone l'applicazione soltanto su
+`127.0.0.1:18080` e usa il context path `/repo-archaeologist`. Lo snippet
+`deploy/nginx/repo-archaeologist.conf` deve essere incluso nel blocco HTTPS già
+esistente per `gianlucabove.it`, seguito dalla verifica e dal reload di Nginx.
+
+La pipeline `.github/workflows/deploy.yml` parte solo dopo il completamento con
+successo della CI sul branch `main`. Il primo deployment clona il repository;
+i successivi allineano la working tree remota a `origin/main` e ricostruiscono il
+container. L'environment GitHub `production` richiede:
+
+- secret `CONTABO_HOST`: hostname o indirizzo IP del server;
+- secret `CONTABO_USER`: utente SSH autorizzato a usare Docker;
+- secret `CONTABO_SSH_PRIVATE_KEY`: chiave privata dedicata alla pipeline;
+- secret `CONTABO_SSH_KNOWN_HOSTS`: chiave host verificata del server;
+- variable `CONTABO_DEPLOY_PATH`: directory assoluta dedicata al deployment.
+
+Ollama non è gestito dalla pipeline: modello, disponibilità e aggiornamenti
+restano responsabilità del servizio condiviso installato sull'host.
+
 Aprendo lo stesso indirizzo nel browser è disponibile una demo web locale, senza
 dipendenze frontend aggiuntive. La pagina usa l'API REST dell'applicazione e mostra
 alcune domande di esempio per presentare rapidamente il flusso di investigazione.

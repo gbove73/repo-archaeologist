@@ -1,0 +1,48 @@
+name: Deploy to Contabo
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Configure SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.CONTABO_SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.CONTABO_SSH_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          install -m 600 /dev/null ~/.ssh/id_ed25519
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+      - name: Update application
+        env:
+          CONTABO_HOST: ${{ secrets.CONTABO_HOST }}
+          CONTABO_USER: ${{ secrets.CONTABO_USER }}
+          DEPLOY_PATH: ${{ vars.CONTABO_DEPLOY_PATH }}
+        run: |
+          ssh "$CONTABO_USER@$CONTABO_HOST" "bash -se" -- "$DEPLOY_PATH" <<'REMOTE_SCRIPT'
+          set -eu
+          deploy_path="$1"
+          if [ ! -d "$deploy_path/.git" ]; then
+              mkdir -p "$deploy_path"
+              git clone --branch main https://github.com/gbove73/repo-archaeologist.git "$deploy_path"
+          fi
+          git -C "$deploy_path" fetch origin main
+          git -C "$deploy_path" checkout main
+          git -C "$deploy_path" reset --hard origin/main
+          docker compose --project-directory "$deploy_path" up --detach --build --remove-orphans
+          REMOTE_SCRIPT
