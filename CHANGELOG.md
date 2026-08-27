@@ -6,6 +6,10 @@ Il formato segue [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) e il p
 
 ## [Unreleased]
 
+### Fixed
+
+- Corretta l'immagine Docker includendo i sorgenti della GUI Next.js nello stage di build.
+
 ### Added
 
 - Aggiunta una GUI Next.js interattiva, incorporata automaticamente nel JAR e pubblicata sotto `/repo-archaeologist`.

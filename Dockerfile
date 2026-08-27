@@ -6,6 +6,7 @@ COPY mvnw pom.xml ./
 RUN ./mvnw --batch-mode dependency:go-offline
 
 COPY src/ src/
+COPY web/ web/
 RUN ./mvnw --batch-mode package -DskipTests
 
 FROM eclipse-temurin:25-jre-noble

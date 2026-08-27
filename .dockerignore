@@ -4,6 +4,10 @@
 deploy
 outputs
 target
+web/.next
+web/node
+web/node_modules
+web/out
 *.iml
 *.log
 *.pptx
