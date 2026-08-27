@@ -256,9 +256,22 @@ container. L'environment GitHub `production` richiede:
 Ollama non è gestito dalla pipeline: modello, disponibilità e aggiornamenti
 restano responsabilità del servizio condiviso installato sull'host.
 
-Aprendo lo stesso indirizzo nel browser è disponibile una demo web locale, senza
-dipendenze frontend aggiuntive. La pagina usa l'API REST dell'applicazione e mostra
-alcune domande di esempio per presentare rapidamente il flusso di investigazione.
+Aprendo lo stesso indirizzo nel browser è disponibile una GUI Next.js responsive.
+La pagina usa l'API REST dell'applicazione, presenta i cinque strumenti Git e offre
+domande di esempio per avviare rapidamente un'investigazione. La build Maven installa
+una versione locale di Node.js, verifica il frontend e incorpora l'esportazione statica
+nel JAR: non serve distribuire un secondo servizio web.
+
+Per lavorare soltanto sull'interfaccia durante lo sviluppo:
+
+```bash
+cd web
+npm install
+npm run dev
+```
+
+La preview Next.js usa il prefisso `/repo-archaeologist`; le investigazioni complete
+richiedono comunque il backend Spring Boot e Ollama.
 
 ### Esecuzione rapida della demo su macOS
 

@@ -2,6 +2,10 @@
 *.iml
 .DS_Store
 target/
+web/node_modules/
+web/.next/
+web/out/
+web/node/
 .env
 *.log
 deploy/.env

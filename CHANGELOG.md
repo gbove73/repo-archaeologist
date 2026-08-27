@@ -8,6 +8,7 @@ Il formato segue [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) e il p
 
 ### Added
 
+- Aggiunta una GUI Next.js interattiva, incorporata automaticamente nel JAR e pubblicata sotto `/repo-archaeologist`.
 - Aggiunti container applicativo, configurazione Compose e deployment CI/CD su Contabo dal branch `main`, mantenendo Ollama come servizio condiviso sull'host.
 - Aggiunto uno snippet Nginx per pubblicare l'applicazione sotto `/repo-archaeologist` senza esporre direttamente la porta del container.
 
