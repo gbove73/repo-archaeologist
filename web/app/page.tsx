@@ -1,7 +1,6 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import Link from "next/link";
 
 const suggestions = [
   "Perché esiste RepositoryPathValidator?",
@@ -42,9 +41,10 @@ export default function Home() {
     <main className="site-shell">
       <nav>
         <a className="logo" href="#top"><span>RA</span><b>REPO / ARCHAEOLOGIST</b></a>
-        <div className="nav-links"><Link href="/">HOME</Link><a href="#investigate">INDAGA</a><a href="#method">METODO</a><a href="https://github.com/gbove73/repo-archaeologist">SOURCE ↗</a></div>
+        <div className="nav-links"><a href="#investigate">INDAGA</a><a href="#method">METODO</a><a href="https://github.com/gbove73/repo-archaeologist">SOURCE ↗</a></div>
         <span className="system-state"><i /> LOCAL AI / READY</span>
       </nav>
+      <a className="home-return" href="https://gianlucabove.it/">← TORNA ALLA HOME</a>
 
       <section className="hero" id="top">
         <div className="coordinate">41°54&apos;N / 12°29&apos;E <i /> ARCHIVE NODE 01</div>

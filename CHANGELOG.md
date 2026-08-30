@@ -18,6 +18,7 @@ Il formato segue [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) e il p
 
 ### Changed
 
+- Reso sempre visibile, anche su mobile, il collegamento della GUI per tornare alla home del sito.
 - Aggiunto nella navigazione della GUI un collegamento diretto per tornare alla home di `gianlucabove.it`.
 - Aggiornati gli esempi d'uso nella documentazione per renderli più generali e riutilizzabili.
 - Resi relativi gli URL delle risorse web e dell'API per supportare sia la radice locale sia il sottopercorso di produzione.
