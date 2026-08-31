@@ -10,6 +10,28 @@ const suggestions = [
 
 type InvestigationResponse = { answer?: string; generatedAt?: string; message?: string };
 
+async function readInvestigationResponse(response: Response): Promise<InvestigationResponse> {
+  const contentType = response.headers.get("content-type") ?? "";
+
+  // Nginx può restituire una pagina HTML quando il modello supera il timeout:
+  // non la esponiamo all'utente e traduciamo lo stato HTTP in un messaggio utile.
+  if (!contentType.includes("application/json")) {
+    if (response.status === 504) {
+      throw new Error("Il modello locale ha impiegato troppo tempo. Riprova con una domanda più specifica.");
+    }
+    if (response.status === 502 || response.status === 503) {
+      throw new Error("Il modello locale non è momentaneamente disponibile. Riprova tra poco.");
+    }
+    throw new Error(`Il servizio ha restituito una risposta non valida (errore ${response.status}).`);
+  }
+
+  try {
+    return await response.json() as InvestigationResponse;
+  } catch {
+    throw new Error("Il servizio ha restituito una risposta incompleta. Riprova tra poco.");
+  }
+}
+
 export default function Home() {
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
@@ -25,7 +47,7 @@ export default function Home() {
 
     try {
       const response = await fetch("api/investigations", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question: question.trim() }) });
-      const body = await response.json() as InvestigationResponse;
+      const body = await readInvestigationResponse(response);
       if (!response.ok) throw new Error(body.message || "Il reperto non è disponibile.");
       setAnswer(body.answer || "Nessuna evidenza trovata.");
       setGeneratedAt(body.generatedAt || "");

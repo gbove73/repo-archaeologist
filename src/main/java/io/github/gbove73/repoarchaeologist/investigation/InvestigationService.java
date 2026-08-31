@@ -2,6 +2,7 @@ package io.github.gbove73.repoarchaeologist.investigation;
 
 import io.github.gbove73.repoarchaeologist.git.RepositoryTools;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.ollama.api.OllamaChatOptions;
 import org.springframework.stereotype.Service;
 
 /**
@@ -27,6 +28,11 @@ public class InvestigationService {
         return chatClient.prompt()
                 .user(question)
                 .tools(repositoryTools)
+                // Su server CPU-only il ragionamento esteso può superare il timeout del proxy.
+                // L'analisi resta affidata ai tool Git, mentre la sintesi viene mantenuta concisa.
+                .options(OllamaChatOptions.builder()
+                        .disableThinking()
+                        .numPredict(700))
                 .call()
                 .content();
     }

@@ -18,6 +18,7 @@ public class ApplicationConfiguration {
                 Usa gli strumenti Git disponibili prima di rispondere. Non inventare motivazioni non dimostrate.
                 Distingui chiaramente fatti, inferenze e informazioni mancanti.
                 Cita commit con hash breve, data e file pertinenti. Rispondi nella lingua della domanda.
+                Scegli soltanto gli strumenti strettamente necessari e produci una risposta concisa.
                 """).build();
     }
 }

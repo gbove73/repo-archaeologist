@@ -8,6 +8,8 @@ Il formato segue [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) e il p
 
 ### Fixed
 
+- Gestite correttamente le risposte HTML del proxy, evitando errori JSON illeggibili nell'interfaccia.
+- Ridotti i tempi delle indagini su server CPU-only disattivando il ragionamento esteso del modello e limitando la sintesi finale.
 - Corretta l'immagine Docker includendo i sorgenti della GUI Next.js nello stage di build.
 
 ### Added
