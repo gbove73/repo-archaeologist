@@ -92,11 +92,11 @@ export default function Home() {
             <label htmlFor="question">Cosa vuoi portare alla luce?</label>
             <textarea id="question" maxLength={2000} required value={question} onChange={(event) => setQuestion(event.target.value)} placeholder="Perché questa validazione esiste ancora?" />
             <div className="suggestions">{suggestions.map((suggestion) => <button type="button" key={suggestion} onClick={() => setQuestion(suggestion)}>{suggestion}</button>)}</div>
-            <div className="actions"><span><i /> OLLAMA · QWEN3:8B</span><button disabled={isLoading}>{isLoading ? "SCAVO IN CORSO…" : "SCAVA NELLA STORIA"}<b>→</b></button></div>
+            <div className="actions"><span><i /> OLLAMA · QWEN3:8B</span><button disabled={isLoading} aria-busy={isLoading}>{isLoading ? "SCAVO IN CORSO…" : "SCAVA NELLA STORIA"}{isLoading ? <span className="mini-loader" aria-hidden="true"><i /><i /><i /></span> : <b>→</b>}</button></div>
           </form>
         </div>
 
-        {answer && <section className={`evidence ${isError ? "error" : ""}`} aria-live="polite"><header><div><span>02</span><h3>REPERTO / EVIDENCE LOG</h3></div><time>{generatedAt ? new Intl.DateTimeFormat("it-IT", { dateStyle: "medium", timeStyle: "short" }).format(new Date(generatedAt)) : "ANALISI ATTIVA"}</time></header><pre>{answer}</pre></section>}
+        {answer && <section className={`evidence ${isError ? "error" : ""}`} aria-live="polite" aria-busy={isLoading}><header><div><span>02</span><h3>REPERTO / EVIDENCE LOG</h3></div><time>{generatedAt ? new Intl.DateTimeFormat("it-IT", { dateStyle: "medium", timeStyle: "short" }).format(new Date(generatedAt)) : "ANALISI ATTIVA"}</time></header>{isLoading ? <div className="processing" role="status"><div className="processing-icon" aria-hidden="true"><i className="orbit orbit-one" /><i className="orbit orbit-two" /><i className="scan-line" /><b /></div><div><strong>SCAVO NELLA CRONOLOGIA</strong><p>Sto collegando commit, patch, blame e rinomine.</p></div></div> : <pre>{answer}</pre>}</section>}
       </section>
 
       <section className="method" id="method">
